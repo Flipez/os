@@ -12,13 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: sudo apt update && sudo apt install -y qemu-kvm
-    - run: rustup update
-    - run: cargo install bootimage
-    - run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-    - run: rustup component add llvm-tools-preview
-    - run: cargo test
-    - run: cargo bootimage --release
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y qemu-kvm
+        rustup update
+        cargo install bootimage
+        rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+        rustup component add llvm-tools-preview
+    - name: Run Tests
+      run: cargo test
+    - name: Create Binary
+      run: cargo bootimage --release
+      if: startsWith(github.ref, 'refs/tags/')
     - name: Release with Notes
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
